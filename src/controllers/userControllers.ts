@@ -4,11 +4,12 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 
 export const resgisterUser = async (req: Request, res: Response) => {
-    if (!req.body.email || !req.body.password) {
-        res.status(400).json({ message: "Email and password are required!" });
+    if (!req.body.email || !req.body.password || !req.body.name) {
+        res.status(400).json({ message: "Name, email and password are required!" });
         return;
     }   
     const {
+        name,
         email,
         password
     } = req.body;
@@ -26,7 +27,8 @@ export const resgisterUser = async (req: Request, res: Response) => {
     const hassedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
         data: {
-        email: req.body.email,
+        name: name,
+        email: email,
         password: hassedPassword,
         },
     });
@@ -34,9 +36,9 @@ export const resgisterUser = async (req: Request, res: Response) => {
         res.status(500).json({ message: "Internal server error!" });
         return;
     }
-    const exp = Date.now() + 1000 * 60 * 5;
-    const token = jwt.sign({ sub: user.id, exp }, process.env.SECRET);
-    res.cookie("Authorization", token, { httpOnly: true, secure: true });
+    // const exp = Date.now() + 1000 * 60 * 5;
+    const token = jwt.sign({ sub: user.id }, process.env.SECRET); //remove the expiration date
+    res.cookie("Authorization", token, { httpOnly: true, secure: false }); //secure should be true?
     res.status(201).json({ message: "User created successfully!" });
 } catch (err) {
     res.status(500).json({ message: "Internal server error!" });
@@ -76,9 +78,9 @@ export const login  = async (req: Request, res: Response) => {
         return;
     }
 
-    const exp = Date.now() + 1000 * 60 * 5;
-    const token = jwt.sign({ sub: user.id, exp }, process.env.SECRET);
-    res.cookie("Authorization", token, { httpOnly: true, secure: true });
+    // const exp = Date.now() + 1000 * 60 * 5;
+    const token = jwt.sign({ sub: user.id }, process.env.SECRET);
+    res.cookie("Authorization", token, { httpOnly: true, secure: false }); //secure should be true?
     res.status(200).json({ message: "Login successfully!" });
 }
 
