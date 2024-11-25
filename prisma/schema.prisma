@@ -1,22 +1,121 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-generator client {
-  provider = "prisma-client-js"
-}
-
+// datasource and generator configuration
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+generator client {
+  provider = "prisma-client-js"
+}
+
+// enums
+enum UserRole {
+  FARMER
+  BUYER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum CropType {
+  VEGETABLE
+  PULSE
+  CEREAL
+  ROOT
+  TUBER
+  HERB
+  FRUIT
+  NUT
+  SPICE
+  COTTON
+  TOBACCO
+  BEVERAGE
+  FLOWERS
+}
+
+enum ContractStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  TERMINATED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum NegotiationStatus {
+  INITIATED
+  IN_PROGRESS
+  AGREED
+  CANCELLED
+}
+
+// models
 model User {
-  id     Int     @id @default(autoincrement())
-  name String
-  email    String @unique
-  password String
-  type Boolean // true for farmer, false for buyer
+  id          String        @id @default(uuid())
+  name        String
+  email       String        @unique
+  password    String
+  role        UserRole      @default(FARMER)
+  offers      Offer[]
+  Negotiation Negotiation[]
+  contracts   Contract[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @default(now()) @updatedAt
+}
+
+model Offer {
+  id            String        @id @default(uuid())
+  cropName      String
+  description   String?
+  cropType      CropType
+  price         Float
+  duration      Int // Duration in days
+  quantity      Int
+  harvestTime   DateTime?
+  location      String
+  offerDuration String
+  paymentTerms  String
+  createdBy     String
+  createdByUser User          @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  contracts     Contract[]
+  negotiations  Negotiation[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model Negotiation {
+  id        String            @id @default(uuid())
+  offerId   String
+  buyerId   String
+  status    NegotiationStatus @default(INITIATED)
+  details   String?
+  offer     Offer             @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  buyer     User              @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+}
+
+model Contract {
+  id        String         @id @default(uuid())
+  status    ContractStatus @default(PENDING)
+  offerId   String
+  offer     Offer          @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  buyerId   String
+  buyer     User           @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  payments  Payment[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+}
+
+model Payment {
+  id         String        @id @default(uuid())
+  amount     Float
+  status     PaymentStatus @default(PENDING)
+  contractId String
+  contract   Contract      @relation(fields: [contractId], references: [id], onDelete: Cascade)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
 }
