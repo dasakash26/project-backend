@@ -4,14 +4,15 @@ import { Request, Response } from "express";
 import bcrypt from "bcrypt";
 
 export const resgisterUser = async (req: Request, res: Response) => {
-    if (!req.body.email || !req.body.password || !req.body.name) {
+    if (!req.body.email || !req.body.password || !req.body.name || !req.body.type) {
         res.status(400).json({ message: "Name, email and password are required!" });
         return;
     }   
     const {
         name,
         email,
-        password
+        password,
+        type
     } = req.body;
     try {
     const existeduser = await prisma.user.findFirst({
@@ -20,9 +21,17 @@ export const resgisterUser = async (req: Request, res: Response) => {
             email: email
         }
     })
+
     if (existeduser) {
         res.status(409).json({ message: "User already existed!" });
         return;
+    }
+    let boolType: boolean;
+    if(type === "farmer"){
+        boolType = true;
+    }
+    else{
+        boolType = false;
     }
     const hassedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
@@ -30,6 +39,7 @@ export const resgisterUser = async (req: Request, res: Response) => {
         name: name,
         email: email,
         password: hassedPassword,
+        type: boolType
         },
     });
     if (process.env.SECRET === undefined) {
