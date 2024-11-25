@@ -1,13 +1,19 @@
 import jwt from "jsonwebtoken";
 import prisma from "../lib/prisma";
-// @ts-ignore
-async function requireAuth(req, res, next) {
+import { Request, Response, NextFunction } from "express";
+import secrets from "../utils/secrets";
+
+declare module "express-serve-static-core" {
+  interface Request {
+    user?: any;
+  }
+}
+
+async function requireAuth(req: Request, res: Response, next: NextFunction) {
   try {
     const token = req.cookies.Authorization;
+    const decoded = jwt.verify(token, secrets.jwtSecret);
     // @ts-ignore
-    const decoded = jwt.verify(token, process.env.SECRET);
-    // @ts-ignore
-
     //auth expires in seconds
     // if (Date.now() >= decoded.exp) {
     //   res.sendStatus(410);
@@ -21,7 +27,7 @@ async function requireAuth(req, res, next) {
     const user = await prisma.user.findUnique({
       where: {
         // @ts-ignore
-        id: decoded.sub,
+        id: userId,
       },
     });
     if (!user) {
