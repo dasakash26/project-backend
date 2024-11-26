@@ -16,7 +16,8 @@ export const createOffer = async (req: Request, res: Response) => {
     } = req.body;
 
     const durationInDays = parseInt(offerDuration);
-    // const priceInFloat = parseFloat(price);
+    const priceInFloat = parseFloat(price);
+    const quantityinInt = parseInt(quantity);
     if (
       !cropName ||
       !cropType ||
@@ -33,8 +34,8 @@ export const createOffer = async (req: Request, res: Response) => {
         cropName,
         description,
         cropType,
-        price,
-        quantity,
+        price: priceInFloat,
+        quantity: quantityinInt,
         harvestTime: harvestTime ? new Date(harvestTime) : null,
         location,
         offerDuration,
