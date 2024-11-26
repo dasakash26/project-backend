@@ -1,12 +1,14 @@
 import express, {Request, Response} from "express";
-import { PrismaClient } from "@prisma/client";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { userRouter } from "./router/userRouter";
 import secrets from "./utils/secrets";
 import { offerRouter } from "./router/offerRouter";
+import { searchRouter } from "./router/searchRouter";
+import { dummyDataRouter } from "./router/dummyDataRouter";
 
 const app = express();
+
 app.use(express.json());
 const corsOptions ={
     origin:'http://localhost:5173', 
@@ -16,18 +18,18 @@ const corsOptions ={
 app.use(cors(corsOptions));
 app.use(cookieParser());
 
-// app.use((req: Request, res: Response, next) => {
-//     console.log(`>> ${req.method} ${req.path}`);
-//     next();
-// })
+//debug logger
+app.use((req: Request, res: Response, next) => {
+    console.log(`>> ${req.method} ${req.path}`);
+    console.log(req.body);
+    console.log(req.query);
+    next();
+})
 
 app.use('/api/v1/user',userRouter);
 app.use("/api/v1/offer", offerRouter);
-
-// app.post("/signup", async (req: Request, res: Response) => {
-//     await prisma.user.create({data: {email: req.body.email, password: req.body.password}});
-//     res.status(201).json({message: "User created successfully!"});
-// })
+app.use("/api/v1/search", searchRouter);
+app.use("/api/v1/dummy", dummyDataRouter);
 
 app.get("/", (req: Request, res: Response) => {
     res.send("Agripact server is running...");

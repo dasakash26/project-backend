@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import prisma from "../lib/prisma"; // Ensure this is the correct import for your Prisma client
+import prisma from "../lib/prisma"; 
 
 export const createOffer = async (req: Request, res: Response) => {
   try {
@@ -17,7 +17,7 @@ export const createOffer = async (req: Request, res: Response) => {
 
     const durationInDays = parseInt(offerDuration);
     const priceInFloat = parseFloat(price);
-    const quantityinInt = parseInt(quantity);
+    const quantityInInt = parseInt(quantity);
     if (
       !cropName ||
       !cropType ||
@@ -35,10 +35,10 @@ export const createOffer = async (req: Request, res: Response) => {
         description,
         cropType,
         price: priceInFloat,
-        quantity: quantityinInt,
+        quantity: quantityInInt,
         harvestTime: harvestTime ? new Date(harvestTime) : null,
         location,
-        offerDuration,
+        offerDuration: durationInDays,
         paymentTerms,
         createdBy: req.user.id,
       },
@@ -53,6 +53,7 @@ export const createOffer = async (req: Request, res: Response) => {
   }
 };
 
+//get offer by id
 export const getOffer = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -73,23 +74,3 @@ export const getOffer = async (req: Request, res: Response) => {
   }
 };
 
-export const searchOffer = async (req: Request, res: Response) => {
-  try {
-    const { cropName } = req.query;
-
-    if (!cropName) {
-      return res.status(400).json({ error: "Missing cropName query parameter." });
-    }
-
-    const offers = await prisma.offer.findMany({
-      where: {
-        cropName: { contains: cropName as string, mode: 'insensitive' },
-      },
-    });
-
-    return res.status(200).json({ offers });
-  } catch (error) {
-    console.error("Error fetching offers:", error);
-    return res.status(500).json({ error: "Internal server error." });
-  }
-};

@@ -1,15 +1,8 @@
-/*
-  Warnings:
-
-  - The primary key for the `User` table will be changed. If it partially fails, the table could be left without primary key constraint.
-  - You are about to drop the column `type` on the `User` table. All the data in the column will be lost.
-
-*/
 -- CreateEnum
 CREATE TYPE "UserRole" AS ENUM ('FARMER', 'BUYER', 'ADMIN', 'SUPER_ADMIN');
 
 -- CreateEnum
-CREATE TYPE "CropType" AS ENUM ('WHEAT', 'RICE', 'CORN', 'VEGETABLES', 'FRUITS');
+CREATE TYPE "CropType" AS ENUM ('CEREAL', 'VEGETABLE', 'FRUIT', 'PULSE', 'LEGUME', 'OILSEED', 'FODDER', 'SUGAR_CROP', 'SPICE', 'COTTON', 'TOBACCO', 'FLOWER', 'MEDICINAL', 'FIBER_CROP', 'ORNAMENTAL', 'AQUATIC_CROP', 'PLANTATION', 'MISCELLANEOUS');
 
 -- CreateEnum
 CREATE TYPE "ContractStatus" AS ENUM ('PENDING', 'ACTIVE', 'COMPLETED', 'TERMINATED');
@@ -20,16 +13,18 @@ CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'COMPLETED', 'FAILED');
 -- CreateEnum
 CREATE TYPE "NegotiationStatus" AS ENUM ('INITIATED', 'IN_PROGRESS', 'AGREED', 'CANCELLED');
 
--- AlterTable
-ALTER TABLE "User" DROP CONSTRAINT "User_pkey",
-DROP COLUMN "type",
-ADD COLUMN     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-ADD COLUMN     "role" "UserRole" NOT NULL DEFAULT 'FARMER',
-ADD COLUMN     "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-ALTER COLUMN "id" DROP DEFAULT,
-ALTER COLUMN "id" SET DATA TYPE TEXT,
-ADD CONSTRAINT "User_pkey" PRIMARY KEY ("id");
-DROP SEQUENCE "User_id_seq";
+-- CreateTable
+CREATE TABLE "User" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "role" "UserRole" NOT NULL DEFAULT 'FARMER',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "Offer" (
@@ -38,7 +33,6 @@ CREATE TABLE "Offer" (
     "description" TEXT,
     "cropType" "CropType" NOT NULL,
     "price" DOUBLE PRECISION NOT NULL,
-    "duration" INTEGER NOT NULL,
     "quantity" INTEGER NOT NULL,
     "harvestTime" TIMESTAMP(3),
     "location" TEXT NOT NULL,
@@ -87,6 +81,9 @@ CREATE TABLE "Payment" (
 
     CONSTRAINT "Payment_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- AddForeignKey
 ALTER TABLE "Offer" ADD CONSTRAINT "Offer_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
