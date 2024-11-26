@@ -47,7 +47,7 @@ export const registerUser = async (req: Request, res: Response) => {
     
     // const exp = Date.now() + 1000 * 60 * 5;
     const token = jwt.sign({ sub: user.id }, secrets.jwtSecret); //remove the expiration date
-    res.cookie("Authorization", token, { httpOnly: true, secure: false }); //secure should be true?
+    res.cookie("Authorization", token, { httpOnly: true, secure: false, domain: 'localhost', path: '/' }); //secure should be true?
     res.status(201).json({ message: "User created successfully!" });
   } catch (err) {
     res.status(500).json({ message: "Internal server error!" });
@@ -82,12 +82,12 @@ export const login = async (req: Request, res: Response) => {
 
   // const exp = Date.now() + 1000 * 60 * 5;
   const token = jwt.sign({ sub: user.id }, secrets.jwtSecret);
-  res.cookie("Authorization", token, { httpOnly: true, secure: false }); //secure should be true?
+  res.cookie("Authorization", token, { httpOnly: true, secure: false, domain: 'localhost', path: '/' }); //secure should be true?
   res.status(200).json({ message: "Login successfully!" });
 };
 
 export const logout = async (req: Request, res: Response) => {
-  res.clearCookie("Authorization");
+  res.clearCookie("Authorization", { httpOnly: true, secure: false, domain: 'localhost', path: '/' });
   res.status(200).json({ message: "Logout successfully!" });
 };
 
