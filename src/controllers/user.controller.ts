@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import secrets from "../utils/secrets";
 
 export const registerUser = async (req: Request, res: Response) => {
+  console.log("here we are");
   if (
     !req.body.email ||
     !req.body.password ||
@@ -51,6 +52,8 @@ export const registerUser = async (req: Request, res: Response) => {
     res.status(201).json({ message: "User created successfully!" });
   } catch (err) {
     res.status(500).json({ message: "Internal server error!" });
+    //@ts-ignore
+    console.log(err.message);
     return;
   }
 };

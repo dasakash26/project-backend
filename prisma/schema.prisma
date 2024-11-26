@@ -17,19 +17,24 @@ enum UserRole {
 }
 
 enum CropType {
-  VEGETABLE
-  PULSE
   CEREAL
-  ROOT
-  TUBER
-  HERB
+  VEGETABLE
   FRUIT
-  NUT
+  PULSE
+  LEGUME
+  OILSEED
+  FODDER
+  SUGAR_CROP
   SPICE
   COTTON
   TOBACCO
-  BEVERAGE
-  FLOWERS
+  FLOWER
+  MEDICINAL
+  FIBER_CROP
+  ORNAMENTAL
+  AQUATIC_CROP
+  PLANTATION
+  MISCELLANEOUS
 }
 
 enum ContractStatus {
@@ -72,11 +77,10 @@ model Offer {
   description   String?
   cropType      CropType
   price         Float
-  // duration      Int // Duration in days
   quantity      Int
   harvestTime   DateTime?
   location      String
-  offerDuration String
+  offerDuration Int
   paymentTerms  String
   createdBy     String
   createdByUser User          @relation(fields: [createdBy], references: [id], onDelete: Cascade)
