@@ -6,6 +6,7 @@ import secrets from "./utils/secrets";
 import { offerRouter } from "./router/offerRouter";
 import { searchRouter } from "./router/searchRouter";
 import { dummyDataRouter } from "./router/dummyDataRouter";
+import { aiRouter } from "./router/aiRouter";
 
 const app = express();
 
@@ -29,6 +30,7 @@ app.use((req: Request, res: Response, next) => {
 app.use('/api/v1/user',userRouter);
 app.use("/api/v1/offer", offerRouter);
 app.use("/api/v1/search", searchRouter);
+app.use("/api/v1/ai", aiRouter);
 app.use("/api/v1/dummy", dummyDataRouter);
 
 app.get("/", (req: Request, res: Response) => {

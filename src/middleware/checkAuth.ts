@@ -34,6 +34,7 @@ async function requireAuth(req: Request, res: Response, next: NextFunction) {
       res.sendStatus(401);
       return;
     }
+    // including user in request object
     req.user = user;
     next();
   } catch (err) {
