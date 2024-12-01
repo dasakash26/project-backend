@@ -51,10 +51,8 @@ enum PaymentStatus {
 }
 
 enum NegotiationStatus {
-  INITIATED
-  IN_PROGRESS
-  AGREED
-  CANCELLED
+  ACCEPTED
+  REJECTED
 }
 
 // models
@@ -65,8 +63,8 @@ model User {
   password    String
   role        UserRole      @default(FARMER)
   offers      Offer[]
-  associatedBuyer Negotiation[] @relation("AssociatedBuyer")
-  associatedFarmer Negotiation[] @relation("AssociatedFarmer")
+  offerCreator Negotiation[] @relation("offerCreator")
+  offerOfferedTo Negotiation[] @relation("offerOfferedTo")
   contracts   Contract[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @default(now()) @updatedAt
@@ -86,24 +84,41 @@ model Offer {
   createdBy     String
   createdByUser User          @relation(fields: [createdBy], references: [id], onDelete: Cascade)
   contracts     Contract[]
-  negotiations  Negotiation[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 }
 
 model Negotiation {
   id        String            @id @default(uuid())
-  offerId   String
-  buyerId   String
-  farmerId  String
-  status    NegotiationStatus @default(INITIATED)
+  currentTermsId   String
+  createdById   String
+  offeredToId  String
+  status    NegotiationStatus?
   details   String?
-  offer     Offer             @relation(fields: [offerId], references: [id], onDelete: Cascade)
-  buyer     User              @relation("AssociatedBuyer", fields: [buyerId], references: [id], onDelete: Cascade)
-  farmer    User              @relation("AssociatedFarmer", fields: [farmerId], references: [id], onDelete: Cascade)
+  currentTerms CurrentTerms @relation(fields: [currentTermsId], references: [id], onDelete: Cascade)
+  creator     User              @relation("offerCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  offeredTo    User              @relation("offerOfferedTo", fields: [offeredToId], references: [id], onDelete: Cascade)
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
-  turn UserRole
+  turn String
+  ongoing Boolean @default(true)
+}
+
+model CurrentTerms {
+  id            String        @id @default(uuid())
+  cropName      String
+  description   String?
+  cropType      CropType
+  price         Float
+  quantity      Int
+  harvestTime   DateTime?
+  location      String
+  offerDuration Int
+  paymentTerms  String
+  createdBy     String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  negotiations Negotiation[]
 }
 
 model Contract {
