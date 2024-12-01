@@ -5,7 +5,6 @@ import bcrypt from "bcrypt";
 import secrets from "../utils/secrets";
 
 export const registerUser = async (req: Request, res: Response) => {
-  console.log("here we are");
   if (
     !req.body.email ||
     !req.body.password ||
