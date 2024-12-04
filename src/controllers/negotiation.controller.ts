@@ -80,3 +80,17 @@ export const updateCurrentTerms = async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to update current terms" });
   }
 };
+
+export const completeNegotiation = async (req: Request, res: Response) => {
+  try {
+    console.log("req.body", req.body);
+    const negotiation = await prisma.negotiation.update({
+      where: { currentTermsId: req.params.currentTermsId },
+      data: { ongoing: false, status: req.body.status },
+    });
+    res.status(200).json({ negotiation });
+  } catch (error) {
+    console.log("Error completing negotiation:", error);
+    res.status(500).json({ error: "Failed to complete negotiation" });
+  }
+};

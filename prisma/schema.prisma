@@ -51,6 +51,7 @@ enum PaymentStatus {
 }
 
 enum NegotiationStatus {
+  ONGOING
   ACCEPTED
   REJECTED
 }
@@ -90,10 +91,10 @@ model Offer {
 
 model Negotiation {
   id        String            @id @default(uuid())
-  currentTermsId   String
+  currentTermsId   String @unique
   createdById   String
   offeredToId  String
-  status    NegotiationStatus?
+  status    NegotiationStatus? @default(ONGOING)
   details   String?
   currentTerms CurrentTerms @relation(fields: [currentTermsId], references: [id], onDelete: Cascade)
   creator     User              @relation("offerCreator", fields: [createdById], references: [id], onDelete: Cascade)
