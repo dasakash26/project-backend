@@ -25,7 +25,7 @@ export const createNegotiation = async (req: Request, res: Response) => {
     res.status(201).json({ message: "Negotiation created successfully."});
   } catch (error) {
     console.log("Error creating negotiation:", error);
-    res.status(500).json({ error: "Failed to create negotiation" });
+    res.status(500).json({ error: "Already negotiating on this offer" });
   }
 };
 
