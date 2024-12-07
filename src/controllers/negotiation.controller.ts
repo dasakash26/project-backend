@@ -85,6 +85,7 @@ export const completeNegotiation = async (req: Request, res: Response) => {
   try {
     console.log("req.body", req.body);
     const negotiation = await prisma.negotiation.update({
+      //@ts-ignore
       where: { currentTermsId: req.params.currentTermsId },
       data: { ongoing: false, status: req.body.status },
     });
