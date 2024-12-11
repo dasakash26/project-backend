@@ -16,6 +16,7 @@ const prompt = `Please analyze this crop offer and provide a detailed review wit
 3. Quantity Assessment: Is the offered quantity of ${offerData.quantity} units appropriate?
 4. Payment Terms: Evaluate the proposed payment terms "${offerData.paymentTerms}"
 5. Recommendations: What specific suggestions would you give to improve this offer?
+6. Rating: Rate this offer out of 10
 
 Please provide your analysis in a clear, structured format addressing each point separately.
 
