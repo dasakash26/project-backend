@@ -11,7 +11,7 @@ CREATE TYPE "ContractStatus" AS ENUM ('PENDING', 'ACTIVE', 'COMPLETED', 'TERMINA
 CREATE TYPE "PaymentStatus" AS ENUM ('PENDING', 'COMPLETED', 'FAILED');
 
 -- CreateEnum
-CREATE TYPE "NegotiationStatus" AS ENUM ('INITIATED', 'IN_PROGRESS', 'AGREED', 'CANCELLED');
+CREATE TYPE "NegotiationStatus" AS ENUM ('ONGOING', 'ACCEPTED', 'REJECTED');
 
 -- CreateTable
 CREATE TABLE "User" (
@@ -36,7 +36,7 @@ CREATE TABLE "Offer" (
     "quantity" INTEGER NOT NULL,
     "harvestTime" TIMESTAMP(3),
     "location" TEXT NOT NULL,
-    "offerDuration" TEXT NOT NULL,
+    "offerDuration" INTEGER NOT NULL,
     "paymentTerms" TEXT NOT NULL,
     "createdBy" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -48,14 +48,36 @@ CREATE TABLE "Offer" (
 -- CreateTable
 CREATE TABLE "Negotiation" (
     "id" TEXT NOT NULL,
-    "offerId" TEXT NOT NULL,
-    "buyerId" TEXT NOT NULL,
-    "status" "NegotiationStatus" NOT NULL DEFAULT 'INITIATED',
+    "currentTermsId" TEXT NOT NULL,
+    "createdById" TEXT NOT NULL,
+    "offeredToId" TEXT NOT NULL,
+    "status" "NegotiationStatus" DEFAULT 'ONGOING',
     "details" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "turn" TEXT NOT NULL,
+    "ongoing" BOOLEAN NOT NULL DEFAULT true,
 
     CONSTRAINT "Negotiation_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "CurrentTerms" (
+    "id" TEXT NOT NULL,
+    "cropName" TEXT NOT NULL,
+    "description" TEXT,
+    "cropType" "CropType" NOT NULL,
+    "price" DOUBLE PRECISION NOT NULL,
+    "quantity" INTEGER NOT NULL,
+    "harvestTime" TIMESTAMP(3),
+    "location" TEXT NOT NULL,
+    "offerDuration" INTEGER NOT NULL,
+    "paymentTerms" TEXT NOT NULL,
+    "createdBy" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "CurrentTerms_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -85,14 +107,20 @@ CREATE TABLE "Payment" (
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "Negotiation_currentTermsId_key" ON "Negotiation"("currentTermsId");
+
 -- AddForeignKey
 ALTER TABLE "Offer" ADD CONSTRAINT "Offer_createdBy_fkey" FOREIGN KEY ("createdBy") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Negotiation" ADD CONSTRAINT "Negotiation_offerId_fkey" FOREIGN KEY ("offerId") REFERENCES "Offer"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Negotiation" ADD CONSTRAINT "Negotiation_currentTermsId_fkey" FOREIGN KEY ("currentTermsId") REFERENCES "CurrentTerms"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Negotiation" ADD CONSTRAINT "Negotiation_buyerId_fkey" FOREIGN KEY ("buyerId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Negotiation" ADD CONSTRAINT "Negotiation_createdById_fkey" FOREIGN KEY ("createdById") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Negotiation" ADD CONSTRAINT "Negotiation_offeredToId_fkey" FOREIGN KEY ("offeredToId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Contract" ADD CONSTRAINT "Contract_offerId_fkey" FOREIGN KEY ("offerId") REFERENCES "Offer"("id") ON DELETE CASCADE ON UPDATE CASCADE;
