@@ -16,6 +16,12 @@ enum UserRole {
   SUPER_ADMIN
 }
 
+enum FarmingType {
+  CONVENTIONAL
+  ORGANIC
+  OTHER
+}
+
 enum CropType {
   CEREAL
   VEGETABLE
@@ -58,21 +64,61 @@ enum NegotiationStatus {
 
 // models
 model User {
-  id          String        @id @default(uuid())
-  name        String
-  email       String        @unique
-  password    String
-  role        UserRole      @default(FARMER)
-  offers      Offer[]
-  offerCreator Negotiation[] @relation("offerCreator")
-  offerOfferedTo Negotiation[] @relation("offerOfferedTo")
-  contracts   Contract[]
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @default(now()) @updatedAt
+  id               String              @id @default(uuid())
+  name             String
+  aadharNumber     String?
+  phoneNumber      String?
+  email            String              @unique
+  password         String
+  role             UserRole            @default(FARMER)
+  address          Address?            @relation(fields: [addressId], references: [id])
+  addressId        String?
+  farmDetails      FarmDetails?
+  farmDetailsId    String?
+  paymentDetails   PaymentPreferences?
+  paymentDetailsId String?
+  crops            String[]
+  offers           Offer[]
+  offerCreator     Negotiation[]       @relation("offerCreator")
+  offerOfferedTo   Negotiation[]       @relation("offerOfferedTo")
+  contracts        Contract[]
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @default(now()) @updatedAt
+}
+
+model Address {
+  id       String  @id @default(uuid())
+  state    String
+  district String?
+  place    String?
+  pin      String?
+  users    User[]
+}
+
+model FarmDetails {
+  id                String      @id @default(uuid())
+  farmSize          Float
+  farmingType       FarmingType
+  irrigationMethods String[]
+  user              User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String      @unique
+}
+
+model PaymentPreferences {
+  id                String   @id @default(uuid())
+  paymentTerms      String
+  accountHolderName String
+  accountNumber     String
+  ifscCode          String
+  upiId             String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId            String   @unique
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now()) @updatedAt
 }
 
 model Offer {
-  id            String        @id @default(uuid())
+  id            String     @id @default(uuid())
   cropName      String
   description   String?
   cropType      CropType
@@ -83,26 +129,26 @@ model Offer {
   offerDuration Int
   paymentTerms  String
   createdBy     String
-  createdByUser User          @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  createdByUser User       @relation(fields: [createdBy], references: [id], onDelete: Cascade)
   contracts     Contract[]
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 }
 
 model Negotiation {
-  id        String            @id @default(uuid())
-  currentTermsId   String @unique
-  createdById   String
-  offeredToId  String
-  status    NegotiationStatus? @default(ONGOING)
-  details   String?
-  currentTerms CurrentTerms @relation(fields: [currentTermsId], references: [id], onDelete: Cascade)
-  creator     User              @relation("offerCreator", fields: [createdById], references: [id], onDelete: Cascade)
-  offeredTo    User              @relation("offerOfferedTo", fields: [offeredToId], references: [id], onDelete: Cascade)
-  createdAt DateTime          @default(now())
-  updatedAt DateTime          @updatedAt
-  turn String
-  ongoing Boolean @default(true)
+  id             String             @id @default(uuid())
+  currentTermsId String             @unique
+  createdById    String
+  offeredToId    String
+  status         NegotiationStatus? @default(ONGOING)
+  details        String?
+  currentTerms   CurrentTerms       @relation(fields: [currentTermsId], references: [id], onDelete: Cascade)
+  creator        User               @relation("offerCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  offeredTo      User               @relation("offerOfferedTo", fields: [offeredToId], references: [id], onDelete: Cascade)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  turn           String
+  ongoing        Boolean            @default(true)
 }
 
 model CurrentTerms {
@@ -119,7 +165,7 @@ model CurrentTerms {
   createdBy     String
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
-  negotiations Negotiation[]
+  negotiations  Negotiation[]
 }
 
 model Contract {

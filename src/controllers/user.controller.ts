@@ -14,7 +14,7 @@ export const registerUser = async (req: Request, res: Response) => {
     res.status(400).json({ message: "Name, email and password are required!" });
     return;
   }
-  
+
   const { name, email, password, role } = req.body;
 
   try {
@@ -39,15 +39,20 @@ export const registerUser = async (req: Request, res: Response) => {
         role: role,
       },
     });
-    
+
     if (secrets.jwtSecret === undefined) {
       res.status(500).json({ message: "Internal server error!" });
       return;
     }
-    
+
     // const exp = Date.now() + 1000 * 60 * 5;
     const token = jwt.sign({ sub: user.id }, secrets.jwtSecret); //remove the expiration date
-    res.cookie("Authorization", token, { httpOnly: true, secure: false, domain: 'localhost', path: '/' }); //secure should be true?
+    res.cookie("Authorization", token, {
+      httpOnly: true,
+      secure: false,
+      domain: "localhost",
+      path: "/",
+    }); //secure should be true?
     res.status(201).json({ message: "User created successfully!" });
   } catch (err) {
     res.status(500).json({ message: "Internal server error!" });
@@ -84,12 +89,22 @@ export const login = async (req: Request, res: Response) => {
 
   // const exp = Date.now() + 1000 * 60 * 5;
   const token = jwt.sign({ sub: user.id }, secrets.jwtSecret);
-  res.cookie("Authorization", token, { httpOnly: true, secure: false, domain: 'localhost', path: '/' }); //secure should be true?
+  res.cookie("Authorization", token, {
+    httpOnly: true,
+    secure: false,
+    domain: "localhost",
+    path: "/",
+  }); //secure should be true?
   res.status(200).json({ message: "Login successfully!" });
 };
 
 export const logout = async (req: Request, res: Response) => {
-  res.clearCookie("Authorization", { httpOnly: true, secure: false, domain: 'localhost', path: '/' });
+  res.clearCookie("Authorization", {
+    httpOnly: true,
+    secure: false,
+    domain: "localhost",
+    path: "/",
+  });
   res.status(200).json({ message: "Logout successfully!" });
 };
 
@@ -97,4 +112,56 @@ export const getUser = async (req: Request, res: Response) => {
   // @ts-ignore
   const user = req.user;
   res.status(200).json({ user });
+};
+
+export const getuserDetails = async (req: Request, res: Response) => {
+  const id = req.user.id;
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+      include: {
+        address: true,
+        paymentDetails: true,
+        farmDetails: true,
+      },
+    });
+    res.status(200).json({ user });
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error!" });
+    //@ts-ignore
+    console.log(err.message);
+    return;
+  }
+};
+
+export const editProfile = async (req: Request, res: Response) => {
+  // @ts-ignore
+  const user = req.user;
+  const { name, aadharNumber, phoneNumber,crops } = req.body;
+  let result = null;
+  try {
+    result = await prisma.user.update({
+      where: {
+        id: user.id,
+      },
+      data: {
+        name: name,
+        aadharNumber: aadharNumber,
+        phoneNumber: phoneNumber,
+        crops:[crops],
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Internal server error!" });
+    //@ts-ignore
+    console.log(err.message);
+    return;
+  }
+
+  res.status(200).json({
+    message: "Edited profile successfully!",
+    user: result,
+  });
 };
