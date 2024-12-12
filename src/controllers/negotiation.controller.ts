@@ -32,22 +32,22 @@ export const createNegotiation = async (req: Request, res: Response) => {
 export const getNegotiations = async (req: Request, res: Response) => {
   try {
     // send only those negotiations where the user is either the creator or the offeredTo
-    const temp_negotiations = await prisma.negotiation.findMany({
+    const negotiations = await prisma.negotiation.findMany({
       where: {
         OR: [{ createdById: req.user.id }, { offeredToId: req.user.id }],
       },
     });
-    let negotiations: any[] = [];
-    temp_negotiations.forEach(async (nego) => {
-      let otherParty: any;
-      if(nego.createdById === req.user.id) otherParty = nego.offeredToId;
-      else otherParty = nego.createdById;
-      const user = await prisma.user.findUnique({ where: { id: otherParty } });
-      let otherPartyName = user?.name;
-      //@ts-ignore
-      nego = {...nego, name: otherPartyName};
-      negotiations.push(nego);
-    });
+    // let negotiations: any[] = [];
+    // temp_negotiations.forEach(async (nego) => {
+    //   let otherParty: any;
+    //   if(nego.createdById === req.user.id) otherParty = nego.offeredToId;
+    //   else otherParty = nego.createdById;
+    //   const user = await prisma.user.findUnique({ where: { id: otherParty } });
+    //   let otherPartyName = user?.name;
+    //   //@ts-ignore
+    //   nego = {...nego, name: otherPartyName};
+    //   negotiations.push(nego);
+    // });
     const currentTerms = await prisma.currentTerms.findMany();
     console.log("negotiations", negotiations);
     res.status(200).json({ negotiations,currentTerms });
