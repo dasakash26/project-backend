@@ -82,6 +82,7 @@ model User {
   offerCreator     Negotiation[]       @relation("offerCreator")
   offerOfferedTo   Negotiation[]       @relation("offerOfferedTo")
   contracts        Contract[]
+  notifications    Notification[]
   createdAt        DateTime            @default(now())
   updatedAt        DateTime            @default(now()) @updatedAt
 }
@@ -165,6 +166,7 @@ model CurrentTerms {
   createdBy     String
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
+  logistics     String        @default("Arranged by buyer")
   negotiations  Negotiation[]
 }
 
@@ -188,4 +190,24 @@ model Payment {
   contract   Contract      @relation(fields: [contractId], references: [id], onDelete: Cascade)
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
+}
+
+model requiredCrops {
+  id        String   @id @default(uuid())
+  cropName  String   @unique
+  userId   String[] 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  title     String
+  message   String
+  status    Boolean  @default(false)
+  userId    String
+  offerId   String[]
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
