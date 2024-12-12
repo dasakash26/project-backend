@@ -8,6 +8,7 @@ import { searchRouter } from "./router/searchRouter";
 import { dummyDataRouter } from "./router/dummyDataRouter";
 import { aiRouter } from "./router/aiRouter";
 import { negotiationRouter } from "./router/negotiationRouter";
+import { notificationRouter } from "./router/notificationRouter";
 const app = express();
 
 app.use(express.json());
@@ -36,6 +37,7 @@ app.use("/api/v1/search", searchRouter);
 app.use("/api/v1/ai", aiRouter);
 app.use("/api/v1/dummy", dummyDataRouter);
 app.use("/api/v1/negotiation", negotiationRouter);
+app.use("/api/v1/myNotifications", notificationRouter);
 
 app.get("/", (req: Request, res: Response) => {
     res.send("Agripact server is running...");
